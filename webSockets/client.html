@@ -7,7 +7,7 @@
 	<label>Name</label>
 	<input type="text" id="name"/>
 	<p> JOIN A ROOM</p>
-	<label>Romm no.</label>
+	<label>Room no.</label>
 	<input type="text" id="room"/>
 	<button onclick="join()" id = "join" >Join</button>
 	<p> OR CREATE A NEW ROOM </p>
@@ -16,8 +16,8 @@
 	<button onclick="play()" id = "play" style = "display : none" >Play</button>
 
 	<label> Cards </label>
-	<textarea id = "cards" style = "width : 100%; height : 50px;" ></textarea>
-
+	<div id = "cards">
+	</div>
 	<label style = "display : none" id = "joker_label">Select Joker</label>
 	<input type="text" id = "joker_text" style = "display : none"/>
 	<p id = "joker_ex">(e.g S,H,C,D)</p>
@@ -77,6 +77,16 @@
 			document.getElementById("joker_btn").style.display = "none";
 			document.getElementById("joker_ex").style.display = "none";
 		}
+		function move(id){
+			console.log(id + " clicked");
+			if ( parseInt(id) >=5 && parseInt(id) < 10) {
+					document.getElementById(id).value = cards[parseInt(id) + 5];
+					document.getElementById(id).id = parseInt(id) + 5;
+			}
+			else {
+				document.getElementById(id).style.display = "none";
+			}
+		}
 		client_socket.onmessage = function(event){
 				var jsonObject = JSON.parse(event.data);
 				document.getElementById("text").value += ( jsonObject.data + "\n");
@@ -91,7 +101,18 @@
 					document.getElementById("play").style.display = "none";
 					hands = jsonObject.hands;
 					cards = jsonObject.cards;
-					document.getElementById("cards").value = cards.slice(0,5);
+					// document.getElementById("cards").value = cards.slice(0,5);
+					var cards_div = document.getElementById("cards");
+					for (var i = 0;i < 5; i++) {
+						let v = document.createElement('input');
+						v.type = "button"
+						v.id = i;
+						v.value = cards.slice(0,5)[i];
+						v.addEventListener('click', function() {
+    							move(v.id);
+							}, false);
+						cards_div.appendChild(v);
+					}
 					if (hands == 8){
 						document.getElementById("joker_label").style.display = "block";
 						document.getElementById("joker_text").style.display = "block";
@@ -100,7 +121,18 @@
 					}
 				}
 				else if (jsonObject.type == "joker") {
-					document.getElementById("cards").value = cards.slice(0,10);
+					var cards_div = document.getElementById("cards");
+					for (var i = 5;i < 10; i++) {
+						let v = document.createElement('input');
+						v.type = "button"
+						v.id = i;
+						v.value = cards.slice(5,10)[i-5];
+						v.addEventListener('click', function() {
+    							move(v.id);
+							}, false);
+						cards_div.appendChild(v);
+					}
+					// document.getElementById("cards").value = cards.slice(0,10);
 					joker = jsonObject.joker;
 				}
 		}
