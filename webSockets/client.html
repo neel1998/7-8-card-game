@@ -97,6 +97,7 @@
 					"type" : "move"
 				};
 				if ( parseInt(id) >=5 && parseInt(id) < 10) {
+						document.getElementById(id).src = "./cards/" + cards[parseInt(id) + 5] + ".png";
 						document.getElementById(id).value = cards[parseInt(id) + 5];
 						document.getElementById(id).id = parseInt(id) + 5;
 					}
@@ -128,9 +129,11 @@
 					var cards_div = document.getElementById("cards");
 					for (var i = 0;i < 5; i++) {
 						let v = document.createElement('input');
-						v.type = "button"
+						v.type = "image"
 						v.id = i;
+						v.src = "./cards/" + cards.slice(0,5)[i] + ".png";
 						v.value = cards.slice(0,5)[i];
+						v.style.margin = "5px";
 						v.addEventListener('click', function() {
     							move(v.id);
 							}, false);
@@ -147,10 +150,11 @@
 					var cards_div = document.getElementById("cards2");
 					for (var i = 5;i < 10; i++) {
 						let v = document.createElement('input');
-						v.type = "button"
+						v.type = "image"
 						v.id = i;
+						v.style.margin = "5px";
 						v.value = cards.slice(5,10)[i-5];
-						// v.style.backgroun = 'url(card.jpg")';
+						v.src = "./cards/" + cards.slice(5,10)[i-5] + ".png";
 						v.addEventListener('click', function() {
     							move(v.id);
 							}, false);

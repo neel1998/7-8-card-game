@@ -10,9 +10,9 @@ CARDS = [ "7h","7s",
 					"8h","8s","8d","8c",
 				  "9h","9s","9d","9c",
 				  "10h","10s","10d","10c",
-				  "Jh","Js","Jd","Jc",
-				  "Qh","Qs","Qd","Qc",
-				  "Kh","Ks","Kd","Kc",
+				  "jh","js","jd","jc",
+				  "qh","qs","qd","qc",
+				  "kh","ks","kd","kc",
 					"1h","1s","1d","1c",];
 R_CARDS = [];
 JOKER = [];
