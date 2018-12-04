@@ -95,6 +95,24 @@ s.on('connection',function(ws){
 				ROOM[i][0].send(JSON.stringify(msg));
 				ROOM[i][1].send(JSON.stringify(msg));
 		}
+		else if (data.type == "move") {
+			var i = data.room;
+			var msg = {
+				"type" : "turn",
+				"room" : i,
+				"data" : data.name + " Played " + data.card,
+				"turn" : 0
+ 			};
+			ROOM[i][data.player_no].send(JSON.stringify(msg));
+			msg.turn = 1;
+			if (data.player_no == 1){
+					ROOM[i][0].send(JSON.stringify(msg));
+			}
+			else {
+				ROOM[i][1].send(JSON.stringify(msg));
+			}
+
+		}
 	});
 });
 function shuffle(array) {

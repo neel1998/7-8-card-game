@@ -18,11 +18,14 @@
 	<label> Cards </label>
 	<div id = "cards">
 	</div>
+	<div id = "cards2">
+	</div>
 	<label style = "display : none" id = "joker_label">Select Joker</label>
 	<input type="text" id = "joker_text" style = "display : none"/>
-	<p id = "joker_ex">(e.g S,H,C,D)</p>
+	<p id = "joker_ex"></p>
 	<button onclick="joker()" id = "joker_btn"  style = "display : none">Select</button>
 
+	<p id = "turn"></p>
 	<label> Moves </label>
 	<textarea id = "text" style = "width : 100%; height : 150px;" ></textarea>
 	<script type="text/javascript">
@@ -32,6 +35,8 @@
 		var hands;
 		var cards;
 		var joker;
+		var turn = 0;
+		var player_no;
 		function join() {
 			name = document.getElementById("name").value;
 			room = document.getElementById("room").value;
@@ -43,6 +48,7 @@
 			document.getElementById("join").style.display = "none";
 			document.getElementById("create").style.display = "none";
 			client_socket.send(JSON.stringify(data));
+			player_no = 1;
 		}
 		function create(){
 			name = document.getElementById("name").value;
@@ -53,6 +59,7 @@
 			document.getElementById("create").style.display = "none";
 			document.getElementById("join").style.display = "none";
 			client_socket.send(JSON.stringify(data));
+			player_no = 0;
 		}
 
 		function play(){
@@ -64,6 +71,8 @@
 					client_socket.send(JSON.stringify(data));
 		}
 		function joker() {
+			turn = 1;
+			document.getElementById("turn").innerHTML = "It is your Turn"
 			joker = document.getElementById("joker_text").value;
 			data = {
 				"name" : name,
@@ -75,16 +84,30 @@
 			document.getElementById("joker_label").style.display = "none";
 			document.getElementById("joker_text").style.display = "none";
 			document.getElementById("joker_btn").style.display = "none";
-			document.getElementById("joker_ex").style.display = "none";
+			document.getElementById("joker_ex").innerHTML = "";
 		}
 		function move(id){
-			console.log(id + " clicked");
-			if ( parseInt(id) >=5 && parseInt(id) < 10) {
-					document.getElementById(id).value = cards[parseInt(id) + 5];
-					document.getElementById(id).id = parseInt(id) + 5;
+			// console.log(id);
+			if (turn == 1){
+				data = {
+					"name" : name,
+					"room" : room,
+					"player_no" : player_no,
+					"card" : document.getElementById(id).value,
+					"type" : "move"
+				};
+				if ( parseInt(id) >=5 && parseInt(id) < 10) {
+						document.getElementById(id).value = cards[parseInt(id) + 5];
+						document.getElementById(id).id = parseInt(id) + 5;
+					}
+					else {
+						document.getElementById(id).style.display = "none";
+					}
+					// turn = 0;
+					client_socket.send(JSON.stringify(data));
 			}
 			else {
-				document.getElementById(id).style.display = "none";
+				document.getElementById("turn").innerHTML = "It is not your Turn"
 			}
 		}
 		client_socket.onmessage = function(event){
@@ -117,16 +140,17 @@
 						document.getElementById("joker_label").style.display = "block";
 						document.getElementById("joker_text").style.display = "block";
 						document.getElementById("joker_btn").style.display = "block";
-						document.getElementById("joker_ex").style.display = "block";
+						document.getElementById("joker_ex").innerHTML = "(e.g S,H,C,D)";
 					}
 				}
 				else if (jsonObject.type == "joker") {
-					var cards_div = document.getElementById("cards");
+					var cards_div = document.getElementById("cards2");
 					for (var i = 5;i < 10; i++) {
 						let v = document.createElement('input');
 						v.type = "button"
 						v.id = i;
 						v.value = cards.slice(5,10)[i-5];
+						// v.style.backgroun = 'url(card.jpg")';
 						v.addEventListener('click', function() {
     							move(v.id);
 							}, false);
@@ -134,6 +158,16 @@
 					}
 					// document.getElementById("cards").value = cards.slice(0,10);
 					joker = jsonObject.joker;
+
+				}
+				else if (jsonObject.type == "turn"){
+					turn = jsonObject.turn;
+					if (turn == 0) {
+						document.getElementById("turn").innerHTML = "It is not your Turn"
+					}
+					else {
+						document.getElementById("turn").innerHTML = "It is your Turn"
+					}
 				}
 		}
 
