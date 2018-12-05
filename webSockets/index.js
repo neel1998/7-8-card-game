@@ -64,14 +64,16 @@ s.on('connection',function(ws){
 					"room" : i,
 					"hands" : 7,
 					"data" : "You will do 7 hands",
-					"cards" : R_CARDS[i].slice(0,15)
+					"cards" : R_CARDS[i].slice(0, 15),
+					"o_cards" : R_CARDS[i].slice(15, 30)
 				};
 				var msg2 = {
 					"type" : "play",
 					"room" : i,
 					"hands" : 8,
 					"data" : "You will do 8 hands",
-					"cards" : R_CARDS[i].slice(15,30)
+					"cards" : R_CARDS[i].slice(15, 30),
+					"o_cards" : R_CARDS[i].slice(0, 15)
 				};
 				if (Math.random() < 0.5 ) {
 					ROOM[i][0].send(JSON.stringify(msg1));
@@ -101,7 +103,8 @@ s.on('connection',function(ws){
 				"type" : "turn",
 				"room" : i,
 				"data" : data.name + " Played " + data.card,
-				"turn" : 0
+				"turn" : 0,
+				"pos" : data.pos
  			};
 			ROOM[i][data.player_no].send(JSON.stringify(msg));
 			msg.turn = 1;
