@@ -14,8 +14,19 @@ CARDS = [ "7h","7s",
 				  "qh","qs","qd","qc",
 				  "kh","ks","kd","kc",
 					"1h","1s","1d","1c",];
+values = {
+	"1" : 14,
+	"7" : 7,
+	"8" : 8,
+	"9" : 9,
+	"10" : 10,
+	"j" : 11,
+	"q" : 12,
+	"k" : 13
+};
 R_CARDS = [];
 JOKER = [];
+TABLE_CARDS = [];
 var can_play = 0;
 s.on('connection',function(ws){
 	ws.on('message',function(message){
@@ -26,6 +37,7 @@ s.on('connection',function(ws){
 				var i = ROOM.length;
 				ROOM[i] = [];
 				NAMES[i] = [];
+				TABLE_CARDS[i] = [];
 				ROOM[i][0] = ws;
 				NAMES[i][0] = data.name;
 				var msg = {
@@ -88,7 +100,8 @@ s.on('connection',function(ws){
 		else if (data.type == "joker") {
 				var i = data.room;
 				JOKER[i] = data.joker;
-				var msg = {
+				JOKER[i] = JOKER[i].toLowerCase();
+ 				var msg = {
 					"type" : "joker",
 					"room" : i,
 					"joker": data.joker,
@@ -99,25 +112,106 @@ s.on('connection',function(ws){
 		}
 		else if (data.type == "move") {
 			var i = data.room;
+			var player_no = data.player_no;
+			var win;
 			var msg = {
 				"type" : "turn",
 				"room" : i,
 				"data" : data.name + " Played " + data.card,
 				"turn" : 0,
+				"win" : "",
 				"pos" : data.pos
  			};
-			ROOM[i][data.player_no].send(JSON.stringify(msg));
-			msg.turn = 1;
-			if (data.player_no == 1){
-					ROOM[i][0].send(JSON.stringify(msg));
+			TABLE_CARDS[i][TABLE_CARDS[i].length] = data.card;
+			if ( TABLE_CARDS[i].length%2 == 0 ) {
+					win = Check(player_no, i);
+					msg.win = NAMES[i][win] + " won this hand"
+					if (win == 1){
+						ROOM[i][0].send(JSON.stringify(msg));
+					}
+					else {
+						ROOM[i][1].send(JSON.stringify(msg));
+					}
+					msg.turn = 1;
+					ROOM[i][win].send(JSON.stringify(msg));
 			}
 			else {
-				ROOM[i][1].send(JSON.stringify(msg));
+				ROOM[i][player_no].send(JSON.stringify(msg));
+				msg.turn = 1;
+			  	if (player_no == 1){
+						ROOM[i][0].send(JSON.stringify(msg));
+					}
+					else {
+						ROOM[i][1].send(JSON.stringify(msg));
+					}
 			}
-
 		}
 	});
 });
+function Check(player_no, room_no) {
+		var win;
+		var card_1 = TABLE_CARDS[room_no][TABLE_CARDS[room_no].length - 2];
+		var card_2 = TABLE_CARDS[room_no][TABLE_CARDS[room_no].length - 1];
+		var card1_val = values[card_1.slice(0,-1)];
+		var card2_val = values[card_2.slice(0,-1)];
+		var card1_joker = card_1.slice(-1);
+		var card2_joker = card_2.slice(-1);
+		//both joker
+		if ( card1_joker == JOKER[room_no] && card2_joker == JOKER[room_no] ) {
+			if (card1_val > card2_val) {
+				if (player_no == 0) {
+					win = 1;
+				}
+				else {
+					win = 0;
+				}
+			}
+			else {
+				win = player_no;
+			}
+		}
+		//1st joker
+		else if ( card1_joker == JOKER[room_no] && card2_joker != JOKER[room_no] ) {
+			if (player_no == 0) {
+				win = 1;
+			}
+			else {
+				win = 0;
+			}
+
+		}
+		//2nd joker
+		else if ( card1_joker != JOKER[room_no] && card2_joker == JOKER[room_no] ) {
+				win = player_no;
+		}
+		//none joker
+		else {
+			if ( card1_joker == card2_joker ) {
+					if (card1_val > card2_val) {
+						if (player_no == 0) {
+							win = 1;
+						}
+						else {
+							win = 0;
+						}
+					}
+					else {
+						win = player_no;
+					}
+			}
+			else {
+				if (player_no == 0) {
+					win = 1;
+				}
+				else {
+					win = 0;
+				}
+			}
+		}
+
+		return win;
+}
+
 function shuffle(array) {
   var currentIndex = array.length, temporaryValue, randomIndex;
 
