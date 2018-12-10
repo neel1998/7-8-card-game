@@ -120,7 +120,9 @@ s.on('connection',function(ws){
 				"data" : data.name + " Played " + data.card,
 				"turn" : 0,
 				"win" : "",
-				"pos" : data.pos
+				"pos" : data.pos,
+				"card" : data.card,
+				"player_no" : player_no
  			};
 			TABLE_CARDS[i][TABLE_CARDS[i].length] = data.card;
 			if ( TABLE_CARDS[i].length%2 == 0 ) {
