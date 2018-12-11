@@ -2,9 +2,12 @@
 <head>
 </head>
 <body>
-	<!-- <button onclick="connect()">Connect</button> -->
-	<h2>7-8 game</h2>
-<div id = "head">
+	<h2 align="center">7-8 game</h2>
+<div id = "score" style = "display : none" >
+		<p>Your Hands Left</p><h2 id = "your_score"></h2>
+		<p>Opponenets Hands Left</p><h2 id = "opponent_score"></h2>
+</div>
+<div id = "head" style = "clear:left" >
 	<label>Name</label>
 	<input type="text" id="name"/>
 	<p> JOIN A ROOM</p>
@@ -32,15 +35,16 @@
 </div>
 <div style = "clear:left">
 <label style = "display : none" id = "joker_label">Select Joker</label>
-<input type="text" id = "joker_text" style = "display : none"/>
-<p id = "joker_ex"></p>
-<button onclick="joker()" id = "joker_btn"  style = "display : none">Select</button>
+<div id = "joker_div"></div>
+<!-- <input type="text" id = "joker_text" style = "display : none"/> -->
+<!-- <p id = "joker_ex"></p> -->
+<!-- <button onclick="joker()" id = "joker_btn"  style = "display : none">Select</button> -->
 <p id = "turn"></p>
 <label> Moves </label>
 </div>
 <div align = "center" id = "result_data">
-		<img id = "card1" src = "./cards/1h.png"/>
-		<img id = "card2" src = "./cards/1h.png"/>
+		<img id = "card1" />
+		<img id = "card2" />
 		<h2 id = "result"></h2>
 </div>
 <textarea id = "text" style = "width : 100%; height : 150px;" ></textarea>
@@ -95,10 +99,12 @@
 					};
 					client_socket.send(JSON.stringify(data));
 		}
-		function joker() {
+		function joker(id) {
 			turn = 1;
 			document.getElementById("turn").innerHTML = "It is your Turn"
-			joker = document.getElementById("joker_text").value;
+			// joker = document.getElementById("joker_text").value;
+			console.log(id.toUpperCase().charAt(0));
+			joker = id.toUpperCase().charAt(0);
 			data = {
 				"name" : name,
 				"room" : room,
@@ -107,9 +113,11 @@
 			};
 			client_socket.send(JSON.stringify(data));
 			document.getElementById("joker_label").style.display = "none";
-			document.getElementById("joker_text").style.display = "none";
-			document.getElementById("joker_btn").style.display = "none";
-			document.getElementById("joker_ex").innerHTML = "";
+			document.getElementById("joker_div").style.display = "none";
+			// document.getElementById("joker_text").style.display = "none";
+			// document.getElementById("joker_btn").style.display = "none";
+			// document.getElementById("joker_ex").innerHTML = "";
+
 		}
 		function move(id){
 			// console.log(id);
@@ -152,6 +160,9 @@
 					hands = jsonObject.hands;
 					cards = jsonObject.cards;
 					o_cards = jsonObject.o_cards;
+
+					document.getElementById("score").style.display = "block";
+
 					// document.getElementById("cards").value = cards.slice(0,5);
 					var cards_div = document.getElementById("cards");
 					for (var i = 0;i < 5; i++) {
@@ -166,11 +177,29 @@
 							}, false);
 						cards_div.appendChild(v);
 					}
-					if (hands == 8){
-						document.getElementById("joker_label").style.displa = "block";
-						document.getElementById("joker_text").style.display = "block";
-						document.getElementById("joker_btn").style.display = "block";
-						document.getElementById("joker_ex").innerHTML = "(e.g S,H,C,D)";
+					if (hands == 8) {
+						document.getElementById("your_score").innerHTML = 8;
+						document.getElementById("opponent_score").innerHTML = 7;
+						var joker_div = document.getElementById("joker_div");
+						var j = ["heart", "diamond", "spade", "club"]
+						for (var i = 0 ; i < 4 ; i++ ){
+								let v = document.createElement('input');
+								v.type = "image"
+								v.id = j[i];
+								v.src = "./cards/" + j[i] + ".png";
+								v.value = cards.slice(0,5)[i];
+								v.style.margin = "5px";
+								v.addEventListener('click', function() {
+		    							joker(v.id);
+									}, false);
+								joker_div.appendChild(v);
+						}
+							document.getElementById("joker_label").style.display = "block";
+
+					}
+					else {
+						document.getElementById("your_score").innerHTML = 7;
+						document.getElementById("opponent_score").innerHTML = 8;
 					}
 				}
 				else if (jsonObject.type == "joker") {
@@ -210,6 +239,28 @@
 								document.getElementById("card2").src = "";
 								document.getElementById("result").innerHTML = "";
 						}, 1500 );
+						if ( jsonObject.name == name ) {
+							var your_hand = parseInt(document.getElementById("your_score").innerHTML);
+							your_hand -- ;
+							if ( your_hand  == 0) {
+								alert("You WOn!!!");
+								setTimeout(function(){
+									document.location.reload();
+								}, 500);
+							}
+							document.getElementById("your_score").innerHTML = your_hand;
+						}
+						else {
+							var opponent_hand = parseInt(document.getElementById("opponent_score").innerHTML);
+							opponent_hand -- ;
+							if ( opponent_hand  == 0) {
+								alert("You Lose!!!");
+								setTimeout(function(){
+									document.location.reload();
+								}, 500);
+							}
+							document.getElementById("opponent_score").innerHTML = opponent_hand;
+						}
 						document.getElementById("result").innerHTML = jsonObject.win;
 					}
 

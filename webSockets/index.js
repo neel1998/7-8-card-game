@@ -122,12 +122,14 @@ s.on('connection',function(ws){
 				"win" : "",
 				"pos" : data.pos,
 				"card" : data.card,
+				"name" : "",
 				"player_no" : player_no
  			};
 			TABLE_CARDS[i][TABLE_CARDS[i].length] = data.card;
 			if ( TABLE_CARDS[i].length%2 == 0 ) {
 					win = Check(player_no, i);
 					msg.win = NAMES[i][win] + " won this hand"
+					msg.name = NAMES[i][win];
 					if (win == 1){
 						ROOM[i][0].send(JSON.stringify(msg));
 					}
