@@ -39,8 +39,8 @@
 <label> Moves </label>
 </div>
 <div align = "center" id = "result_data">
-		<img id = "card1"/>
-		<img id = "card2"/>
+		<img id = "card1" src = "./cards/1h.png"/>
+		<img id = "card2" src = "./cards/1h.png"/>
 		<h2 id = "result"></h2>
 </div>
 <textarea id = "text" style = "width : 100%; height : 150px;" ></textarea>
@@ -167,7 +167,7 @@
 						cards_div.appendChild(v);
 					}
 					if (hands == 8){
-						document.getElementById("joker_label").style.display = "block";
+						document.getElementById("joker_label").style.displa = "block";
 						document.getElementById("joker_text").style.display = "block";
 						document.getElementById("joker_btn").style.display = "block";
 						document.getElementById("joker_ex").innerHTML = "(e.g S,H,C,D)";
@@ -205,6 +205,11 @@
 				else if (jsonObject.type == "turn"){
 					turn = jsonObject.turn;
 					if (jsonObject.win != "") {
+						setTimeout( function(){
+								document.getElementById("card1").src = "";
+								document.getElementById("card2").src = "";
+								document.getElementById("result").innerHTML = "";
+						}, 1500 );
 						document.getElementById("result").innerHTML = jsonObject.win;
 					}
 
@@ -223,9 +228,11 @@
 					}
 					console.log("player no = " + player_no);
 					if (jsonObject.player_no == 0){
+						// document.getElementById("card1").style.display = "block-inline";
 						document.getElementById("card1").src = "./cards/" + jsonObject.card + ".png";
 					}
 					else {
+						// document.getElementById("card2").style.display = "block-inline";
 						document.getElementById("card2").src = "./cards/" + jsonObject.card + ".png";
 					}
 				}
